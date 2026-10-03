@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<html lang="en">
+<head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Vaishnav Unni V — Financial Analyst</title>
@@ -23,23 +25,41 @@
 <style>
   html, body { margin: 0; padding: 0; }
   #root:empty::before {
-    content: "Loading portfolio…";
+    content: "";
     display: block;
-    padding: 80px 24px;
-    text-align: center;
-    font-family: system-ui, sans-serif;
-    color: #5B6472;
   }
+  .site-loader {
+    position: fixed; inset: 0; z-index: 99999; display: grid; place-items: center; align-content: center; gap: 12px;
+    background: radial-gradient(circle at 50% 35%, #16243f 0%, #0B1426 42%, #070d18 100%); color: #fff;
+    transition: opacity .65s ease, visibility .65s ease;
+  }
+  .site-loader.is-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+  .loader-orbit { width: 74px; height: 74px; position: relative; display: grid; place-items: center; }
+  .loader-orbit::before, .loader-orbit::after { content: ""; position: absolute; inset: 4px; border-radius: 50%; border: 1px solid rgba(255,255,255,.13); }
+  .loader-orbit::after { inset: 12px; border-color: rgba(196,30,30,.35); }
+  .loader-orbit span { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #C41E1E; box-shadow: 0 0 18px rgba(196,30,30,.8); animation: loaderOrbit 1.5s linear infinite; transform-origin: 37px 37px; }
+  .loader-orbit span:nth-child(2) { animation-delay: -.5s; transform: rotate(120deg); background: #fff; box-shadow: 0 0 18px rgba(255,255,255,.45); }
+  .loader-orbit span:nth-child(3) { animation-delay: -1s; transform: rotate(240deg); opacity: .7; }
+  @keyframes loaderOrbit { from { transform: rotate(0deg) translateX(29px); } to { transform: rotate(360deg) translateX(29px); } }
+  .loader-brand { font: 700 15px/1 'Space Grotesk', sans-serif; letter-spacing: .22em; }
+  .loader-brand b { color: #C41E1E; }
+  .loader-caption { font: 500 9px/1 'Inter', sans-serif; letter-spacing: .28em; opacity: .5; }
+  @media (prefers-reduced-motion: reduce) { .loader-orbit span { animation: none; } .site-loader { transition: none; } }
 </style>
 </head>
 <body>
 <div id="root"></div>
+<div id="site-loader" className="site-loader" aria-label="Loading portfolio" role="status">
+  <div className="loader-orbit"><span></span><span></span><span></span></div>
+  <div className="loader-brand">VAISHNAV <b>UNNI V</b></div>
+  <div className="loader-caption">FINANCIAL ANALYST · PORTFOLIO</div>
+</div>
 
 <script type="text/babel" data-type="module" data-presets="react">
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { createRoot } from "react-dom/client";
 import {
-  Menu, X, Mail, Phone, Linkedin, Download, ArrowUpRight, Star, Users,
+  Menu, X, Mail, Phone, Linkedin, ArrowUpRight, Star, Users,
   GraduationCap, ChevronRight, CheckCircle2, TrendingUp, Layers, Settings,
   Plus, Trash2, ChevronUp, ChevronDown, Eye, EyeOff, Save, RotateCcw,
   UploadCloud, DownloadCloud, Palette, ListOrdered, FileJson, AlertTriangle,
@@ -62,7 +82,7 @@ const uid = (p = "id") => `${p}_${Math.random().toString(36).slice(2, 9)}`;
    ------------------------------------------------------------ */
 const DEFAULT_DATA = {
   meta: { version: 2 },
-  studioAuth: { pin: "studio2026" },
+  studioAuth: { pin: "Valsala@1967#" },
   theme: {
     primary: "#0B1426",
     accent: "#C41E1E",
@@ -90,7 +110,6 @@ const DEFAULT_DATA = {
     locationShort: "Bengaluru · Coimbatore · Available Globally",
     linkedinUrl: "https://www.linkedin.com/in/vaishnav-unni",
     linkedinHandle: "linkedin.com/in/vaishnav-unni",
-    resumeUrl: "",
     stats: [
       { id: uid("stat"), value: "4+", label: "Finance Roles" },
       { id: uid("stat"), value: "2024", label: "MBA Graduate" },
@@ -253,6 +272,12 @@ const CUSTOM_SECTION_DEFAULTS = {
 
 /* ------------------------------------------------------------
    STORAGE
+   ------------------------------------------------------------
+   IMPORTANT: localStorage persists edits on the admin/browser, but it is
+   intentionally not shared between different visitors. A static HTML file
+   cannot rewrite its deployed source or broadcast admin edits to everyone.
+   For true shared live publishing, connect savePortfolio/loadPortfolio to a
+   server/database (and keep credentials server-side).
    ------------------------------------------------------------ */
 async function loadPortfolio() {
   try {
@@ -695,11 +720,7 @@ function AboutHero({ data, parallax }) {
             <div className="ps-hero-sub-row"><span className="ps-hero-sub-rule" /><p className="ps-hero-sub">{p.heroSubtitle}</p></div>
             <p className="ps-hero-bio">{p.bio}</p>
             <div className="ps-hero-ctas">
-              {p.resumeUrl ? (
-                <a className="ps-btn-primary" href={p.resumeUrl} target="_blank" rel="noopener noreferrer"><Download size={16} /> Download Resume</a>
-              ) : (
-                <a className="ps-btn-primary" href={`mailto:${p.email}`}><Download size={16} /> Download Resume</a>
-              )}
+              <a className="ps-btn-primary" href={`mailto:${p.email}`}><Mail size={16} /> Contact Me</a>
               <a className="ps-btn-outline" href={p.linkedinUrl} target="_blank" rel="noopener noreferrer"><Linkedin size={16} /> LinkedIn</a>
               <a className="ps-btn-soft" href={`tel:${p.phone}`}><Phone size={16} /> {p.phone}</a>
             </div>
@@ -1189,8 +1210,6 @@ function TabProfile({ data, update }) {
       <Field label="Footer location line"><input className="ps-input" value={p.locationShort} onChange={(e) => set("locationShort", e.target.value)} /></Field>
       <Field label="LinkedIn URL"><input className="ps-input" value={p.linkedinUrl} onChange={(e) => set("linkedinUrl", e.target.value)} /></Field>
       <Field label="LinkedIn display handle"><input className="ps-input" value={p.linkedinHandle} onChange={(e) => set("linkedinHandle", e.target.value)} /></Field>
-      <Field label="Resume link (URL)" hint="Leave blank to have the resume button open your email instead."><input className="ps-input" value={p.resumeUrl} onChange={(e) => set("resumeUrl", e.target.value)} /></Field>
-
       <div className="ps-divider-label">Hero stats</div>
       {p.stats.map((s) => (
         <div key={s.id} className="ps-entity-card">
@@ -1893,8 +1912,14 @@ export default function PortfolioStudioApp() {
   useEffect(() => {
     (async () => {
       const loadedData = await loadPortfolio();
-      if (loadedData) setData(mergeWithDefaults(loadedData));
+      if (loadedData) {
+        const merged = mergeWithDefaults(loadedData);
+        // Migrate the original demo credential to the requested admin password once.
+        if (merged.studioAuth?.pin === "studio2026") merged.studioAuth.pin = "Valsala@1967#";
+        setData(merged);
+      }
       setLoaded(true);
+      window.setTimeout(() => document.getElementById("site-loader")?.classList.add("is-hidden"), 650);
     })();
   }, []);
 
@@ -1932,9 +1957,9 @@ export default function PortfolioStudioApp() {
   useDebouncedEffect(() => {
     if (!loaded) return;
     if (isFirstLoad.current) { isFirstLoad.current = false; return; }
-    if (saveStatus === "unsaved") doSave(data);
+    doSave(data);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, loaded], 1100);
+  }, [data, loaded], 700);
 
   const goTo = useCallback((id) => {
     setActiveSection(id);
@@ -1944,6 +1969,15 @@ export default function PortfolioStudioApp() {
   }, []);
 
   const manualSave = () => doSave(data);
+
+  useEffect(() => {
+    const flush = () => {
+      try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
+    };
+    window.addEventListener("beforeunload", flush);
+    window.addEventListener("pagehide", flush);
+    return () => { window.removeEventListener("beforeunload", flush); window.removeEventListener("pagehide", flush); };
+  }, [data]);
 
   const requestStudio = () => {
     if (authed) setStudioOpen(true);
